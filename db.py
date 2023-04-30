@@ -45,7 +45,6 @@ class Vinyl(db.Model):  # each vinyl associated with a user
     songs = db.relationship("Song", cascade="delete")
     user_id = db.Column(db.Integer, db.ForeignKey(
         "user.id"), nullable=False)
-    # others...
 
     def __init__(self, **kwargs):
         """
@@ -65,4 +64,32 @@ class Vinyl(db.Model):  # each vinyl associated with a user
             "artist": self.artist,
             "songs": [s.seriealize() for s in self.songs],
             "user_id": self.user_id
+        }
+
+
+class Song(db.Model):
+    """
+    Song Model
+    """
+    __tablename__ = "song"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String, nullable=False)
+    vinyl_id = db.Column(db.Integer, db.ForeignKey(
+        "vinyl.id"), nullable=False)
+
+    def __init__(self, **kwargs):
+        """
+        Initialize a Song object
+        """
+        self.name = kwargs.get("name", "")
+        self.vinyl_id = kwargs.get("vinyl_id")
+
+    def serialize(self):
+        """
+        Serializes a Song object
+        """
+        return {
+            "id": self.id,
+            "name": self.name,
+            "vinyl_id": self.vinyl_id
         }
