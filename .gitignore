@@ -1,4 +1,4 @@
 venv
-instance
-__pycache__
-env
+src/instance
+src/__pycache__
+*.env
