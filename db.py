@@ -43,8 +43,7 @@ class Vinyl(db.Model):  # each vinyl associated with a user
     artist = db.Column(db.String, nullable=False)
     # optional to input songs
     songs = db.relationship("Song", cascade="delete")
-    user_id = db.Column(db.Integer, db.ForeignKey(
-        "user.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
     def __init__(self, **kwargs):
         """
@@ -74,8 +73,7 @@ class Song(db.Model):
     __tablename__ = "song"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, nullable=False)
-    vinyl_id = db.Column(db.Integer, db.ForeignKey(
-        "vinyl.id"), nullable=False)
+    vinyl_id = db.Column(db.Integer, db.ForeignKey("vinyl.id"), nullable=False)
 
     def __init__(self, **kwargs):
         """
