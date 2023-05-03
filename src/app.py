@@ -112,16 +112,16 @@ def post_vinyl(user_id):
     body = json.loads(request.data)
     name = body.get("name")
     artist = body.get("artist")
-    # type = body.get("type")
+    type = body.get("type")
     if name is None or artist is None:  # or type is None:
         return failure_response("Invalid Input", 400)
-    # if type != "wishlist" and type != "collection":
-    #     return failure_response("Not a valid type", 400)
+    if type != "wishlist" and type != "collection":
+        return failure_response("Not a valid type", 400)
 
     new = Vinyl(
         name=name,
         artist=artist,
-        # type=type,
+        type=type,
         user_id=user_id
     )
 

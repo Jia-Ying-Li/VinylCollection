@@ -28,9 +28,9 @@ class User(db.Model):
             "id": self.id,
             "username": self.username,
             "bio": self.bio,
-            "vinyls": [s.serialize() for s in self.vinyls]
-            # "vinyls": self.get_curr_collection(),
-            # "wishlist": self.get_wishlist()
+            # "vinyls": [s.serialize() for s in self.vinyls]
+            "vinyls": self.get_curr_collection(),
+            "wishlist": self.get_wishlist()
         }
 
     def get_wishlist(self):
@@ -63,7 +63,7 @@ class Vinyl(db.Model):  # each vinyl associated with a user
     name = db.Column(db.String, nullable=False)
     artist = db.Column(db.String, nullable=False)
     # either in collection or in wishlist
-    # type = db.Column(db.String)
+    type = db.Column(db.String, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey(
         "user.id"), nullable=False)
     songs = db.relationship("Song", cascade="delete")
@@ -74,7 +74,7 @@ class Vinyl(db.Model):  # each vinyl associated with a user
         """
         self.name = kwargs.get("name", "")
         self.artist = kwargs.get("artist", "")
-        # self.type = kwargs.get("type", "")
+        self.type = kwargs.get("type", "")
         self.user_id = kwargs.get("user_id")
 
     def serialize(self):
