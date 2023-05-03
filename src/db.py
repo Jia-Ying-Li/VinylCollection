@@ -28,7 +28,7 @@ class User(db.Model):
             "id": self.id,
             "username": self.username,
             "bio": self.bio,
-            "vinyls": self.get_collection(),
+            "vinyls": self.get_curr_collection(),
             "wishlist": self.get_wishlist()
         }
 
