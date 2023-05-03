@@ -7,7 +7,7 @@ from flask import jsonify
 import os
 
 
-db_filename = "collection.db"  # add
+db_filename = "collection.db"
 app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_filename}"
@@ -33,7 +33,8 @@ def failure_response(message, code=404):
     """
     return json.dumps({"error": message}), code
 
-
+# User #
+#==============================================================================#
 @app.route("/")
 @app.route("/api/users/")
 def get_users():
@@ -65,7 +66,7 @@ def create_user():
     return success_response(new_user.serialize(), 201)
 
 
-@app.route("/api/courses/<int:user_id>/", methods=["DELETE"])
+@app.route("/api/users/<int:user_id>/", methods=["DELETE"])
 def delete_user(user_id):
     """ 
     Endpoint for deleting a user by ID
@@ -77,6 +78,69 @@ def delete_user(user_id):
     db.session.commit()
     return success_response(user.serialize(), 200)
 
+# Vinyl #
+#==============================================================================#
+@app.route("/")
+@app.route("/api/users/<int:user_id>/vinyls/")
+def get_vinyls(user_id):
+    """
+    Endpoint for getting vinyls by user id
+    """
+    vinyls = None
+    for user in User.query.all():
+        if user.id == user_id:
+            vinyls = user.vinyls
+
+    if vinyls == None:
+        return failure_response("User Not Found")
+    return success_response(vinyls, 200)
+
+
+@app.route("/api/users/<int:user_id>/vinyls/", methods={"POST"})
+def post_vinyl(user_id):
+    """ 
+    Endpoint for creating a vinyl
+    """
+    user = User.query.filter_by(id = user_id).first()
+    
+    if user is None:
+         return failure_response("User Not Found")
+    
+    body = json.loads(request.data)
+    name = body.get("name")
+    artist = body.get("artist")
+    if name is None or artist is None:
+        return failure_response("Invalid Input", 400)
+    
+    new = Vinyl(
+        name = name,
+        artist = artist,
+        songs = [],
+        user_id = user_id
+    )
+
+    user.vinyls.append(new)
+    db.session.commit()
+
+    return success_response(new.serialize(), 201)
+
+
+@app.route("/api/users/<int:user_id>/vinyls/", methods=["DELETE"])
+def delete_vinyl(user_id, vinyl_id):
+    """ 
+    Endpoint for deleting a vinyl by ID
+    """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return failure_response("User Not Found")
+    
+    vinyl = Vinyl.query.filter_by(id=vinyl_id).first()
+    if vinyl is None:
+        return failure_response("Vinyl Not Found")
+    
+    db.session.delete(vinyl)
+    db.session.commit()
+    return success_response(user.serialize(), 200)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
