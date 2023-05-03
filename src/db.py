@@ -12,7 +12,6 @@ class User(db.Model):
     username = db.Column(db.String, nullable=False)
     bio = db.Column(db.String, nullable=True)
     vinyls = db.relationship("Vinyl", cascade="delete")
-    # wishlist
 
     def __init__(self, **kwargs):
         """
@@ -29,8 +28,29 @@ class User(db.Model):
             "id": self.id,
             "username": self.username,
             "bio": self.bio,
-            "vinyls": [s.seriealize() for s in self.vinyls],
+            "vinyls": self.get_collection(),
+            "wishlist": self.get_wishlist()
         }
+
+    def get_wishlist(self):
+        """
+        Gets list of vinyls with type "wishlist"
+        """
+        wishlist = []
+        for v in self.vinyls:
+            if v.type == "wishlist":
+                wishlist.append(v.serialize())
+        return wishlist
+
+    def get_curr_collection(self):
+        """
+        Gets list of vinyls with type "collection"
+        """
+        collection = []
+        for v in self.vinyls:
+            if v.type == "collection":
+                collection.append(v.serialize())
+        return collection
 
 
 class Vinyl(db.Model):  # each vinyl associated with a user
@@ -42,6 +62,7 @@ class Vinyl(db.Model):  # each vinyl associated with a user
     name = db.Column(db.String, nullable=False)
     artist = db.Column(db.String, nullable=False)
     songs = db.relationship("Song", cascade="delete")
+    type = db.Column(db.String)  # either in collection or in wishlist
     user_id = db.Column(db.Integer, db.ForeignKey(
         "user.id"), nullable=False)
 
@@ -51,6 +72,7 @@ class Vinyl(db.Model):  # each vinyl associated with a user
         """
         self.name = kwargs.get("name", "")
         self.artist = kwargs.get("artist", "")
+        self.type = kwargs.get("type", "")
         self.user_id = kwargs.get("user_id")
 
     def serialize(self):
