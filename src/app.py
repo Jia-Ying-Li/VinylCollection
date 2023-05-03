@@ -34,7 +34,9 @@ def failure_response(message, code=404):
     return json.dumps({"error": message}), code
 
 # User #
-#==============================================================================#
+# ==============================================================================#
+
+
 @app.route("/")
 @app.route("/api/users/")
 def get_users():
@@ -58,8 +60,7 @@ def create_user():
 
     new_user = User(
         username=body.get("username"),
-        bio=body.get("bio"),
-        vinyls=[]
+        bio=body.get("bio")
     )
     db.session.add(new_user)
     db.session.commit()
@@ -79,8 +80,10 @@ def delete_user(user_id):
     return success_response(user.serialize(), 200)
 
 # Vinyl #
-#==============================================================================#
-@app.route("/")
+# ==============================================================================#
+
+
+# @app.route("/")
 @app.route("/api/users/<int:user_id>/vinyls/")
 def get_vinyls(user_id):
     """
@@ -96,29 +99,33 @@ def get_vinyls(user_id):
     return success_response(vinyls, 200)
 
 
-@app.route("/api/users/<int:user_id>/vinyls/", methods={"POST"})
+@app.route("/api/users/<int:user_id>/vinyls/", methods=["POST"])
 def post_vinyl(user_id):
     """ 
     Endpoint for creating a vinyl
     """
-    user = User.query.filter_by(id = user_id).first()
-    
+    user = User.query.filter_by(id=user_id).first()
+
     if user is None:
-         return failure_response("User Not Found")
-    
+        return failure_response("User Not Found")
+
     body = json.loads(request.data)
     name = body.get("name")
     artist = body.get("artist")
-    if name is None or artist is None:
+    # type = body.get("type")
+    if name is None or artist is None:  # or type is None:
         return failure_response("Invalid Input", 400)
-    
+    # if type != "wishlist" and type != "collection":
+    #     return failure_response("Not a valid type", 400)
+
     new = Vinyl(
-        name = name,
-        artist = artist,
-        songs = [],
-        user_id = user_id
+        name=name,
+        artist=artist,
+        # type=type,
+        user_id=user_id
     )
 
+    db.session.add(new)
     user.vinyls.append(new)
     db.session.commit()
 
@@ -133,14 +140,15 @@ def delete_vinyl(user_id, vinyl_id):
     user = User.query.filter_by(id=user_id).first()
     if user is None:
         return failure_response("User Not Found")
-    
+
     vinyl = Vinyl.query.filter_by(id=vinyl_id).first()
     if vinyl is None:
         return failure_response("Vinyl Not Found")
-    
+
     db.session.delete(vinyl)
     db.session.commit()
     return success_response(user.serialize(), 200)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
