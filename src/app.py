@@ -82,16 +82,28 @@ def delete_user(user_id):
 # Vinyl #
 # ==============================================================================#
 
+
+@app.route("/api/vinyls/")
+def get_all_vinyls():
+    """
+    Endpoint to get all vinyls
+    """
+    vinyls = []
+    for vinyl in Vinyl.query.all():
+        vinyls.append(vinyl.serialize())
+    return success_response({"vinyls": vinyls})
+
+
 @app.route("/api/users/<int:user_id>/vinyls/")
 def get_vinyls(user_id):
     """
     Endpoint for getting vinyls by user id
     """
-    user = User.query.filter_by(id = user_id).first()
+    user = User.query.filter_by(id=user_id).first()
 
     if user is None:
         return failure_response("User Not Found")
- 
+
     vinyls = user.vinyls
     print(vinyls)
     return success_response(vinyls.serialize(), 200)
@@ -100,9 +112,9 @@ def get_vinyls(user_id):
 @app.route("/api/users/<int:user_id>/vinyls/", methods=["POST"])
 def post_vinyl(user_id):
     """ 
-    Endpoint for creating a vinyl
+    Endpoint for creating a vinyl and adding it for a user
     """
-    user = User.query.filter_by(id = user_id).first()
+    user = User.query.filter_by(id=user_id).first()
 
     if user is None:
         return failure_response("User Not Found")
@@ -133,25 +145,52 @@ def post_vinyl(user_id):
     return success_response(new.serialize(), 201)
 
 
-# commenting out for now because won't really work with one to many
-# @app.route("/api/vinyls/many/", methods=["POST"])
-# def post_many_vinyls():
-#     body = json.loads(request.data)
-#     for vinyl in body:
-#         name = body.get("name")
-#         artist = body.get("artist")
-#         year = body.get("year")
-#         if name is None or artist is None:
-#             return failure_response("Invalid Input", 400)
-#         new = Vinyl(
-#             name=name,
-#             artist=artist,
-#             year=year,
-#         )
-#         db.session.add(new)
-#         db.session.commit()
+@app.route("/api/vinyls/many/", methods=["POST"])
+def post_many_vinyls():
+    body = json.loads(request.data)
+    for vinyl in body:
+        name = body[vinyl]["name"]
+        artist = body[vinyl]["artist"]
+        year = body[vinyl]["year"]
+        if name is None or artist is None:
+            return failure_response("Invalid Input", 400)
+        new = Vinyl(
+            name=name,
+            artist=artist,
+            year=year,
+        )
+        db.session.add(new)
+        db.session.commit()
 
-#     return success_response("all added", 201) #should I actually dump all of them
+    # should I actually dump all of them
+    return success_response("all added", 201)
+
+
+@app.route("/api/users/<int:user_id>/vinyls/add/", methods=["POST"])
+def assign_vinyl_to_user(user_id):
+    """
+    Assigns an already existing vinyl to a users waitlist or collection
+    Request takes in user id and type
+    """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return failure_response("User not found")
+    body = json.loads(request.data)
+    vinyl_id = body.get("vinyl_id")
+    type = body.get("type")
+    if vinyl_id is None or type is None:
+        return failure_response("Don't supply all fields", 400)
+    if type != "wishlist" and type != "collection":
+        return failure_response("Not a valid type", 400)
+    vinyl = Vinyl.query.filter_by(id=vinyl_id).first()
+    if vinyl is None:
+        return failure_response("Vinyl not found")
+
+    vinyl.type = type
+    db.session.commit()
+    user.vinyls.append(vinyl)
+    db.session.commit()
+    return success_response(user.serialize())
 
 
 @app.route("/api/users/<int:user_id>/vinyls/", methods=["DELETE"])

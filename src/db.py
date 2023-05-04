@@ -3,16 +3,22 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 # Vinyl Collection Types
-collection_association = db.Table(
-    "collection_association",
+# collection_association = db.Table(
+#     "collection_association",
+#     db.Column("vinyl_id", db.Integer, db.ForeignKey("vinyl.id")),
+#     db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
+# )
+# wishlist_association = db.Table(
+#     "wishlist_association",
+#     db.Column("vinyl_id", db.Integer, db.ForeignKey("vinyl.id")),
+#     db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
+# )
+association_table = db.Table(
+    "association",
     db.Column("vinyl_id", db.Integer, db.ForeignKey("vinyl.id")),
     db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
 )
-wishlist_association = db.Table(
-    "wishlist_association",
-    db.Column("vinyl_id", db.Integer, db.ForeignKey("vinyl.id")),
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
-)
+
 
 class User(db.Model):
     """
@@ -23,8 +29,12 @@ class User(db.Model):
     username = db.Column(db.String, nullable=False)
     bio = db.Column(db.String, nullable=True)
 
-    vinyls = db.relationship("Vinyl", secondary = collection_association, back_populates = "collections")
-    wishlist = db.relationship("Vinyl", secondary = wishlist_association, back_populates = "wishlist")
+    # vinyls = db.relationship(
+    #     "Vinyl", secondary=collection_association, back_populates="collections")
+    # wishlist = db.relationship(
+    #     "Vinyl", secondary=wishlist_association, back_populates="wishlist")
+    vinyls = db.relationship(
+        "Vinyl", secondary=association_table, back_populates="users")
 
     # vinyls = db.relationship("Vinyl", cascade="delete")
 
@@ -47,7 +57,7 @@ class User(db.Model):
             "vinyls": self.get_curr_collection(),
             "wishlist": self.get_wishlist()
         }
-    
+
     def simple_serialize(self):
         """
         Simple Serializes a User object
@@ -76,11 +86,11 @@ class User(db.Model):
         collection = []
         for v in self.vinyls:
             if v.type == "collection":
-                collection.append(v.serialize())
+                collection.append(v.simple_serialize())
         return collection
 
 
-class Vinyl(db.Model):  # each vinyl associated with a user
+class Vinyl(db.Model):
     """
     Vinyl Model
     """
@@ -89,12 +99,17 @@ class Vinyl(db.Model):  # each vinyl associated with a user
     name = db.Column(db.String, nullable=False)
     artist = db.Column(db.String, nullable=False)
     year = db.Column(db.String, nullable=True)
-    user_id = db.Column(db.String, nullable=False)
+    user_id = db.Column(db.String, nullable=True)
+    # should we get rid of user id??
 
     # either in collection or in wishlist
-    type = db.Column(db.String, nullable=False)
-    collections = db.relationship("User", secondary = collection_association, back_populates = "vinyls")
-    wishlist = db.relationship("User", secondary = wishlist_association, back_populates = "wishlist")
+    type = db.Column(db.String, nullable=True)
+    # collections = db.relationship(
+    #     "User", secondary=collection_association, back_populates="vinyls")
+    # wishlist = db.relationship(
+    #     "User", secondary=wishlist_association, back_populates="wishlist")
+    users = db.relationship(
+        "User", secondary=association_table, back_populates="vinyls")
 
     songs = db.relationship("Song", cascade="delete")
 
@@ -106,7 +121,7 @@ class Vinyl(db.Model):  # each vinyl associated with a user
         self.artist = kwargs.get("artist", "")
         self.year = kwargs.get("year", "")
         self.type = kwargs.get("type", "")
-        self.user_id = kwargs.get("user_id")
+        self.user_id = kwargs.get("user_id", "")
 
     def serialize(self):
         """
@@ -118,10 +133,11 @@ class Vinyl(db.Model):  # each vinyl associated with a user
             "artist": self.artist,
             "year": self.year,
             "songs": [s.simple_serialize() for s in self.songs],
-            "collections": [c.simple_serialize() for c in self.collections],
-            "wishlist": [w.simple_serialize() for w in self.wishlist]
+            "users": [u.simple_serialize() for u in self.users]
+            # "collections": [c.simple_serialize() for c in self.collections],
+            # "wishlist": [w.simple_serialize() for w in self.wishlist]
         }
-    
+
     def simple_serialize(self):
         """
         Simple Serializes a Vinyl object
@@ -132,7 +148,6 @@ class Vinyl(db.Model):  # each vinyl associated with a user
             "artist": self.artist,
             "year": self.year,
         }
-
 
 
 class Song(db.Model):
