@@ -82,21 +82,19 @@ def delete_user(user_id):
 # Vinyl #
 # ==============================================================================#
 
-
-# @app.route("/")
 @app.route("/api/users/<int:user_id>/vinyls/")
 def get_vinyls(user_id):
     """
     Endpoint for getting vinyls by user id
     """
-    vinyls = None
-    for user in User.query.all():
-        if user.id == user_id:
-            vinyls = user.vinyls
+    user = User.query.filter_by(id = user_id).first()
 
-    if vinyls == None:
+    if user is None:
         return failure_response("User Not Found")
-    return success_response(vinyls, 200)
+ 
+    vinyls = user.vinyls
+    print(vinyls)
+    return success_response(vinyls.serialize(), 200)
 
 
 @app.route("/api/users/<int:user_id>/vinyls/", methods=["POST"])
@@ -104,7 +102,7 @@ def post_vinyl(user_id):
     """ 
     Endpoint for creating a vinyl
     """
-    user = User.query.filter_by(id=user_id).first()
+    user = User.query.filter_by(id = user_id).first()
 
     if user is None:
         return failure_response("User Not Found")
@@ -114,10 +112,11 @@ def post_vinyl(user_id):
     artist = body.get("artist")
     year = body.get("year")
     type = body.get("type")
+
     if name is None or artist is None or type is None:
         return failure_response("Invalid Input", 400)
     if type != "wishlist" and type != "collection":
-        return failure_response("Not a valid type", 400)
+        return failure_response("Not A Valid Type", 400)
 
     new = Vinyl(
         name=name,
