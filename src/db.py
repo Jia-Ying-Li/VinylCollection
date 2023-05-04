@@ -201,7 +201,7 @@ class Asset(db.Model):
     Asset Model
     """
     __tablename__ = "assets"
-    id - db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     base_url = db.Column(db.String, nullable=True)
     salt = db.Column(db.String, nullable=False)
     extension = db.Column(db.String, nullable=False)
@@ -214,6 +214,15 @@ class Asset(db.Model):
         Initializes asset object
         """
         self.create(kwargs.get("image_data"))
+
+    def serialize(self):
+        """
+        Serializes an Asset Object
+        """
+        return {
+            "url": f"{self.base_url}/{self.salt}.{self.extension}",
+            "created_at": str(self.created_at)
+        }
 
     def create(self, image_data):
         """

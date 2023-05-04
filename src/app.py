@@ -1,6 +1,6 @@
 import json
 
-from db import db, User, Vinyl, Song
+from db import db, User, Vinyl, Song, Asset
 from flask import Flask
 from flask import request
 from flask import jsonify
@@ -209,6 +209,23 @@ def delete_vinyl(user_id, vinyl_id):
     db.session.delete(vinyl)
     db.session.commit()
     return success_response(user.serialize(), 200)
+
+
+@app.route("/upload/", methods=["POST"])
+def upload():
+    """
+    Endpoint for uploading an image to AWS given its base64 form,
+    then storing/returning the URL of that image
+    """
+    body = json.loads(request.data)
+    image_data = body.get("image_data")
+    if image_data is None:
+        return failure_response("No Base64 URL")
+    asset = Asset(image_data=image_data)
+    db.session.add(asset)
+    db.session.commit()
+
+    return success_response(asset.serialize(), 201)
 
 
 if __name__ == "__main__":
