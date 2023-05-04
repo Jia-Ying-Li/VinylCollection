@@ -122,7 +122,7 @@ def post_vinyl(user_id):
     new = Vinyl(
         name=name,
         artist=artist,
-        year=year
+        year=year,
         type=type,
         user_id=user_id
     )
@@ -132,6 +132,27 @@ def post_vinyl(user_id):
     db.session.commit()
 
     return success_response(new.serialize(), 201)
+
+
+# commenting out for now because won't really work with one to many
+# @app.route("/api/vinyls/many/", methods=["POST"])
+# def post_many_vinyls():
+#     body = json.loads(request.data)
+#     for vinyl in body:
+#         name = body.get("name")
+#         artist = body.get("artist")
+#         year = body.get("year")
+#         if name is None or artist is None:
+#             return failure_response("Invalid Input", 400)
+#         new = Vinyl(
+#             name=name,
+#             artist=artist,
+#             year=year,
+#         )
+#         db.session.add(new)
+#         db.session.commit()
+
+#     return success_response("all added", 201) #should I actually dump all of them
 
 
 @app.route("/api/users/<int:user_id>/vinyls/", methods=["DELETE"])

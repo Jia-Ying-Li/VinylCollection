@@ -232,8 +232,20 @@ def search_for_album(token, album_name):
 
 
 token = get_token()
+dict = {}
+i = 0
 for album in popular_albums:
     result = search_for_album(token, album)
 
-    print(result["name"], result["images"][0]
-          ["url"], result["artists"][0]["name"], result["release_date"][0:4])
+    # print(result["name"], result["images"][0]
+    # ["url"], result["artists"][0]["name"], result["release_date"][0:4])
+    album_name = result["name"]
+    img = result["images"][0]["url"]
+    artist = result["artists"][0]["name"]
+    year = result["release_date"][0:4]
+    dict[i] = {"name": album_name, "artist": artist,
+               "year": year, "image": img}
+    i = i+1
+json_data = json.dumps(dict)
+# print(json_data)
+# use this as request data
