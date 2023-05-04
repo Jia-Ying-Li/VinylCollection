@@ -18,7 +18,8 @@ db = SQLAlchemy()
 EXTENSIONS = ["png", "gif", "jpg", "jpeg"]
 BASE_DIR = os.getcwd()
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
-# formatted string literal, using for building link
+#print(S3_BUCKET_NAME) - set manually still prints None after
+
 S3_BASE_URL = f"https://{S3_BUCKET_NAME}.s3.us-east-1.amazonaws.com"
 
 # Vinyl Collection Types
@@ -55,8 +56,6 @@ class User(db.Model):
     vinyls = db.relationship(
         "Vinyl", secondary=association_table, back_populates="users")
 
-    # vinyls = db.relationship("Vinyl", cascade="delete")
-
     def __init__(self, **kwargs):
         """
         Initializes User object
@@ -72,7 +71,6 @@ class User(db.Model):
             "id": self.id,
             "username": self.username,
             "bio": self.bio,
-            # "vinyls": [s.serialize() for s in self.vinyls]
             "vinyls": self.get_curr_collection(),
             "wishlist": self.get_wishlist()
         }
@@ -85,7 +83,7 @@ class User(db.Model):
             "id": self.id,
             "username": self.username,
             "bio": self.bio,
-            # "vinyls": [s.serialize() for s in self.vinyls]
+
         }
 
     def get_wishlist(self):
@@ -119,14 +117,12 @@ class Vinyl(db.Model):
     artist = db.Column(db.String, nullable=False)
     year = db.Column(db.String, nullable=True)
     # user_id = db.Column(db.String, nullable=True)
-    # should we get rid of user id??
+
+    img = db.Column(db.String, nullable=True)
 
     # either in collection or in wishlist
     type = db.Column(db.String, nullable=True)
-    # collections = db.relationship(
-    #     "User", secondary=collection_association, back_populates="vinyls")
-    # wishlist = db.relationship(
-    #     "User", secondary=wishlist_association, back_populates="wishlist")
+
     users = db.relationship(
         "User", secondary=association_table, back_populates="vinyls")
 
@@ -139,6 +135,7 @@ class Vinyl(db.Model):
         self.name = kwargs.get("name", "")
         self.artist = kwargs.get("artist", "")
         self.year = kwargs.get("year", "")
+        self.img = kwargs.get("img", "")
         self.type = kwargs.get("type", "")
         # self.user_id = kwargs.get("user_id", "")
 
@@ -151,10 +148,10 @@ class Vinyl(db.Model):
             "name": self.name,
             "artist": self.artist,
             "year": self.year,
+            "img": self.img,
             "songs": [s.simple_serialize() for s in self.songs],
             "users": [u.simple_serialize() for u in self.users]
-            # "collections": [c.simple_serialize() for c in self.collections],
-            # "wishlist": [w.simple_serialize() for w in self.wishlist]
+
         }
 
     def simple_serialize(self):
@@ -166,6 +163,7 @@ class Vinyl(db.Model):
             "name": self.name,
             "artist": self.artist,
             "year": self.year,
+            "img": self.img,
         }
 
 

@@ -224,8 +224,33 @@ def upload():
     asset = Asset(image_data=image_data)
     db.session.add(asset)
     db.session.commit()
+    serialized = asset.serialize()
+    
+    return success_response(serialized, 201)
 
-    return success_response(asset.serialize(), 201)
+@app.route("/upload/<vinyl_id>/", methods=["POST"])
+def upload_vinyl_img(vinyl_id):
+    """
+    Endpoint for uploading an image to AWS given its base64 form,
+    then storing/returning the URL of that image and adding as img field in vinyl table
+    """
+    body = json.loads(request.data)
+    image_data = body.get("image_data")
+    if image_data is None:
+        return failure_response("No Base64 URL")
+    asset = Asset(image_data=image_data)
+    db.session.add(asset)
+    db.session.commit()
+    # get url - add to vinyls database
+    serialized = asset.serialize()
+    url = serialized["url"]
+    vinyl = Vinyl.query.filter_by(id=vinyl_id).first()
+
+    vinyl.img = url
+    db.session.commit()
+    
+
+    return success_response(serialized, 201)
 
 
 if __name__ == "__main__":
