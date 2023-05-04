@@ -62,6 +62,7 @@ class Vinyl(db.Model):  # each vinyl associated with a user
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, nullable=False)
     artist = db.Column(db.String, nullable=False)
+    year = db.Column(db.String, nullable=True)
     # either in collection or in wishlist
     type = db.Column(db.String, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey(
@@ -74,6 +75,7 @@ class Vinyl(db.Model):  # each vinyl associated with a user
         """
         self.name = kwargs.get("name", "")
         self.artist = kwargs.get("artist", "")
+        self.year = kwargs.get("year", "")
         self.type = kwargs.get("type", "")
         self.user_id = kwargs.get("user_id")
 
@@ -85,6 +87,7 @@ class Vinyl(db.Model):  # each vinyl associated with a user
             "id": self.id,
             "name": self.name,
             "artist": self.artist,
+            "year": self.year,
             "songs": [s.serialize() for s in self.songs],
             "user_id": self.user_id
         }
