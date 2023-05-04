@@ -118,7 +118,7 @@ class Vinyl(db.Model):
     name = db.Column(db.String, nullable=False)
     artist = db.Column(db.String, nullable=False)
     year = db.Column(db.String, nullable=True)
-    user_id = db.Column(db.String, nullable=True)
+    # user_id = db.Column(db.String, nullable=True)
     # should we get rid of user id??
 
     # either in collection or in wishlist
@@ -140,7 +140,7 @@ class Vinyl(db.Model):
         self.artist = kwargs.get("artist", "")
         self.year = kwargs.get("year", "")
         self.type = kwargs.get("type", "")
-        self.user_id = kwargs.get("user_id", "")
+        # self.user_id = kwargs.get("user_id", "")
 
     def serialize(self):
         """

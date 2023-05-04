@@ -94,30 +94,30 @@ def get_all_vinyls():
     return success_response({"vinyls": vinyls})
 
 
-@app.route("/api/users/<int:user_id>/vinyls/")
-def get_vinyls(user_id):
-    """
-    Endpoint for getting vinyls by user id
-    """
-    user = User.query.filter_by(id=user_id).first()
+# @app.route("/api/users/<int:user_id>/vinyls/")
+# def get_vinyls(user_id):
+#     """
+#     Endpoint for getting vinyls by user id
+#     """
+#     user = User.query.filter_by(id=user_id).first()
 
-    if user is None:
-        return failure_response("User Not Found")
+#     if user is None:
+#         return failure_response("User Not Found")
 
-    vinyls = user.vinyls
-    print(vinyls)
-    return success_response(vinyls.serialize(), 200)
+#     vinyls = user.vinyls
+#     # print(vinyls)
+#     return success_response(vinyls.serialize(), 200)
 
 
-@app.route("/api/users/<int:user_id>/vinyls/", methods=["POST"])
-def post_vinyl(user_id):
+@app.route("/api/vinyls/", methods=["POST"])
+def post_vinyl():
     """ 
     Endpoint for creating a vinyl and adding it for a user
     """
-    user = User.query.filter_by(id=user_id).first()
+    # user = User.query.filter_by(id=user_id).first()
 
-    if user is None:
-        return failure_response("User Not Found")
+    # if user is None:
+    #     return failure_response("User Not Found")
 
     body = json.loads(request.data)
     name = body.get("name")
@@ -135,11 +135,11 @@ def post_vinyl(user_id):
         artist=artist,
         year=year,
         type=type,
-        user_id=user_id
+        # user_id=user_id
     )
 
     db.session.add(new)
-    user.vinyls.append(new)
+    # user.vinyls.append(new)
     db.session.commit()
 
     return success_response(new.serialize(), 201)
