@@ -249,3 +249,7 @@ for album in popular_albums:
 json_data = json.dumps(dict)
 # print(json_data)
 # use this as request data
+# note for self: can also get genre too if we want to have search by genre
+
+# can I put the urls I got directly?? If not how to proceed
+# could get chatgpt to generate images
