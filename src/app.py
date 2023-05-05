@@ -225,8 +225,9 @@ def upload():
     db.session.add(asset)
     db.session.commit()
     serialized = asset.serialize()
-    
+
     return success_response(serialized, 201)
+
 
 @app.route("/upload/<vinyl_id>/", methods=["POST"])
 def upload_vinyl_img(vinyl_id):
@@ -248,7 +249,6 @@ def upload_vinyl_img(vinyl_id):
 
     vinyl.img = url
     db.session.commit()
-    
 
     return success_response(serialized, 201)
 

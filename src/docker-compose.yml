@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  demo:
+    image: jiayingli03/hackchallenge
+    ports: 
+      - "80:8000"
+    env_file: .env 
+
+    
