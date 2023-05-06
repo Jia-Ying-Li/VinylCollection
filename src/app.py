@@ -94,30 +94,12 @@ def get_all_vinyls():
     return success_response({"vinyls": vinyls})
 
 
-# @app.route("/api/users/<int:user_id>/vinyls/")
-# def get_vinyls(user_id):
-#     """
-#     Endpoint for getting vinyls by user id
-#     """
-#     user = User.query.filter_by(id=user_id).first()
-
-#     if user is None:
-#         return failure_response("User Not Found")
-
-#     vinyls = user.vinyls
-#     # print(vinyls)
-#     return success_response(vinyls.serialize(), 200)
-
 
 @app.route("/api/vinyls/", methods=["POST"])
 def post_vinyl():
     """ 
-    Endpoint for creating a vinyl and adding it for a user
+    Endpoint for creating a single vinyl 
     """
-    # user = User.query.filter_by(id=user_id).first()
-
-    # if user is None:
-    #     return failure_response("User Not Found")
 
     body = json.loads(request.data)
     name = body.get("name")
@@ -135,11 +117,9 @@ def post_vinyl():
         artist=artist,
         year=year,
         type=type,
-        # user_id=user_id
     )
 
     db.session.add(new)
-    # user.vinyls.append(new)
     db.session.commit()
 
     return success_response(new.serialize(), 201)
@@ -147,6 +127,9 @@ def post_vinyl():
 
 @app.route("/api/vinyls/many/", methods=["POST"])
 def post_many_vinyls():
+    """
+    Endpoint for adding database of vinyls
+    """
     body = json.loads(request.data)
     for vinyl in body:
         name = body[vinyl]["name"]
@@ -162,7 +145,7 @@ def post_many_vinyls():
         db.session.add(new)
         db.session.commit()
 
-    # should I actually dump all of them
+    
     return success_response("all added", 201)
 
 
@@ -170,7 +153,7 @@ def post_many_vinyls():
 def assign_vinyl_to_user(user_id):
     """
     Assigns an already existing vinyl to a users waitlist or collection
-    Request takes in user id and type
+    Request takes in vinyl id and type
     """
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -242,7 +225,7 @@ def upload_vinyl_img(vinyl_id):
     asset = Asset(image_data=image_data)
     db.session.add(asset)
     db.session.commit()
-    # get url - add to vinyls database
+    
     serialized = asset.serialize()
     url = serialized["url"]
     vinyl = Vinyl.query.filter_by(id=vinyl_id).first()

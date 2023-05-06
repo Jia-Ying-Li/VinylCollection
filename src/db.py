@@ -18,21 +18,11 @@ db = SQLAlchemy()
 EXTENSIONS = ["png", "gif", "jpg", "jpeg"]
 BASE_DIR = os.getcwd()
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
-#print(S3_BUCKET_NAME) - set manually still prints None after
+
 
 S3_BASE_URL = f"https://{S3_BUCKET_NAME}.s3.us-east-1.amazonaws.com"
 
-# Vinyl Collection Types
-# collection_association = db.Table(
-#     "collection_association",
-#     db.Column("vinyl_id", db.Integer, db.ForeignKey("vinyl.id")),
-#     db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
-# )
-# wishlist_association = db.Table(
-#     "wishlist_association",
-#     db.Column("vinyl_id", db.Integer, db.ForeignKey("vinyl.id")),
-#     db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
-# )
+
 association_table = db.Table(
     "association",
     db.Column("vinyl_id", db.Integer, db.ForeignKey("vinyl.id")),
@@ -49,10 +39,7 @@ class User(db.Model):
     username = db.Column(db.String, nullable=False)
     bio = db.Column(db.String, nullable=True)
 
-    # vinyls = db.relationship(
-    #     "Vinyl", secondary=collection_association, back_populates="collections")
-    # wishlist = db.relationship(
-    #     "Vinyl", secondary=wishlist_association, back_populates="wishlist")
+    
     vinyls = db.relationship(
         "Vinyl", secondary=association_table, back_populates="users")
 
@@ -116,7 +103,6 @@ class Vinyl(db.Model):
     name = db.Column(db.String, nullable=False)
     artist = db.Column(db.String, nullable=False)
     year = db.Column(db.String, nullable=True)
-    # user_id = db.Column(db.String, nullable=True)
 
     img = db.Column(db.String, nullable=True)
 
@@ -137,7 +123,7 @@ class Vinyl(db.Model):
         self.year = kwargs.get("year", "")
         self.img = kwargs.get("img", "")
         self.type = kwargs.get("type", "")
-        # self.user_id = kwargs.get("user_id", "")
+        
 
     def serialize(self):
         """
