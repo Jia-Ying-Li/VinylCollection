@@ -135,12 +135,14 @@ def post_many_vinyls():
         name = body[vinyl]["name"]
         artist = body[vinyl]["artist"]
         year = body[vinyl]["year"]
+        img = body[vinyl]["image"]
         if name is None or artist is None:
             return failure_response("Invalid Input", 400)
         new = Vinyl(
             name=name,
             artist=artist,
             year=year,
+            img =img
         )
         db.session.add(new)
         db.session.commit()
